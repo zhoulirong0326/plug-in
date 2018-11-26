@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>楼层</title>
+	<script src="http://www.jq22.com/jquery/jquery-1.10.2.js"></script>
+</head>
+<style>
+	#step{
+		position: fixed;
+		background-color: #fff;
+		top: 50%;
+	}
+	/*普通div*/
+	#step ul{
+		position: relative;
+		z-index: 1;
+		margin-top: 0px;
+		list-style: none;
+	}
+	#step ul li{
+		float: left;
+		width: 100%;
+		height: 20px;
+		line-height: 20px;
+		cursor: pointer;
+	}
+	#step .bg_color{
+		background-color: purple;
+		display: inline-block;
+		height: 20px;
+		width: 100%;
+		position: absolute;
+		top: 0px;
+		left: 0px;
+	}
+	/*背景图片的话，可以直接用背景定位来做*/
+
+	#building .floor{
+		height: 2000px;
+	}
+	#building .floor:nth-child(odd){
+		background-color: green;
+	}
+	#building .floor:nth-child(even){
+		background-color: blue;
+	}
+</style>
+<body>
+	<!-- 楼层 start -->
+	<div id="step">
+		<ul class="box">
+			<li>第1层</li>
+			<li>第2层</li>
+			<li>第3层</li>
+			<li>第4层</li>
+		</ul>
+		<span class="bg_color"></span>
+	</div>
+	<!-- 楼层 end -->
+	<section id="building">
+		<div class="floor"><h3>第1层 向下滚动查看效果</h3> </div>
+		<div class="floor">第2层</div>
+		<div class="floor">第3层</div>
+		<div class="floor">第4层</div>
+	</section>
+</body>
+<script>
+	var bd_height = new Array();
+	// 记忆变量
+	var old_key = 0;
+	/*加载完成执行*/
+	$(function(){
+		$('#building .floor').each(function(){
+			bd_height[$(this).index()] = $(this).offset().top;
+		})
+		// 滚动条事件
+		$(window).scroll(function(){
+			// 当前滚动条的高度
+			var sl_this = $(this).height();
+			// 滚动条上放的高度
+			var sl_top = $(this).scrollTop();
+			// 出现的高度
+			var show_ht = sl_top+sl_this/2;
+			// 获取楼层的层数，0层开始
+			var key = 0;
+
+			// 此处可以根据自己的情况进行更改
+			// for，each，for in都可以 建议改为for循环
+			// console.log(bd_height);
+			bd_height.map(function(value,index){
+				// 阶梯判断[这一步很重要]	
+				if(show_ht >= value){
+						key = index;
+				}
+			})
+			// 修改楼梯的样式
+			if(old_key == key){
+				return false;
+			}else{
+				old_key = key;
+				// 调起修改样式函数
+				change_step(key);
+			}
+		})
+	})
+	/*修改楼梯的函数*/
+	function change_step(key){
+		// 获取当前的背景块定位
+		var bg_color = $('#step .bg_color');
+		var old_top = bg_color.position().top;
+		// 获取目标位置的高度
+		var ul_ftop = $('#step .box').offset().top;
+		var li_ftop = $('#step .box li').eq(key).offset().top;
+
+		var target_top = li_ftop-ul_ftop;
+		// 开启动画
+		bg_color.animate({top:target_top}, 'fast');
+	}
+	/*修改建筑的函数*/
+	function change_building(key){
+		// 当前滚动条的高度
+		var sl_this = $(window).height();
+		// 获取目标的位置
+		var target = $('#building .floor').eq(key).offset().top;
+		target -= sl_this/2-1;
+		// 开启动画
+		$('html,body').animate({scrollTop:target});
+	}
+	/*点击跳转到楼层*/
+	$('#step .box li').click(function(){
+		var key = $(this).index();
+		// 跳转建筑
+		change_building(key);
+	})
+</script>
+</html>
